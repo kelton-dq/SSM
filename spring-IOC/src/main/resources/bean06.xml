@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:list id="bookList">
+        <ref bean="book1"/>
+        <ref bean="book2"/>
+    </util:list>
+
+    <!--集合类型属性注入-->
+    <bean id="student" class="pojo.Student">
+        <!--数组类型-->
+        <property name="courses">
+            <array>
+                <value>DSP</value>
+                <value>FPGA</value>
+            </array>
+        </property>
+        <!--列表类型-->
+        <property name="list">
+            <list>
+                <value>A</value>
+                <value>B</value>
+            </list>
+        </property>
+        <!--Map类型-->
+        <property name="map">
+            <map>
+                <entry key="A" value="a"/>
+                <entry key="B" value="b"/>
+            </map>
+        </property>
+        <!--对象类型-->
+        <property name="books" ref="bookList"/>
+    </bean>
+
+    <bean id="teacher" class="pojo.Teacher">
+        <property name="books" ref="bookList"/>
+    </bean>
+
+    <bean id="book1" class="pojo.Book">
+        <property name="name" value="math"/>
+        <property name="author" value="dd"/>
+        <property name="birth" value="22"/>
+    </bean>
+    <bean id="book2" class="pojo.Book">
+        <property name="name" value="computer"/>
+        <property name="author" value="qq"/>
+        <property name="birth" value="22"/>
+    </bean>
+
+</beans>
