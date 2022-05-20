@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>测试请求参数</title>
+</head>
+<body>
+<a th:href="@{/param/testServletAPI(username='admin', password=123456)}">servletAPI方式</a><br/>
+<a th:href="@{/param/testParam(username='admin', password=123456)}">param方式</a><br/>
+<form th:action="@{/param/testParam}" method="post">
+    用户名：<input type="text" name="username"><br/>
+    密码：<input type="password" name="password"><br/>
+    爱好：<input type="checkbox" name="hobby" value="a">a
+    <input type="checkbox" name="hobby" value="b">b
+    <input type="checkbox" name="hobby" value="c">c<br/>
+    <input type="submit" value="param提交">
+</form>
+
+<form th:action="@{/param/testpojo}" method="post">
+    用户名：<input type="text" name="username"><br>
+    密码：<input type="password" name="password"><br>
+    性别：<input type="radio" name="sex" value="男">男<input type="radio" name="sex" value="女">女<br>
+    年龄：<input type="text" name="age"><br>
+    邮箱：<input type="text" name="email"><br>
+    <input type="submit" value="对象类型传参">
+</form>
+</body>
+</html>
