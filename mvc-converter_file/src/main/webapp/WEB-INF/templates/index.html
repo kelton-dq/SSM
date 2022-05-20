@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+</head>
+<body>
+<a th:href="@{/testResponse}">通过HttpServletResponse对象响应浏览器数据</a><br/>
+<a th:href="@{/testResponseBody}">通过ResponseBody注解响应浏览器数据</a><br/>
+<a th:href="@{/testResponseUser}">通过ResponseBody注解响应浏览器User对象</a><br/>
+<div id="app">
+    <a th:href="@{/testAjax}" @click="testAjax">testAjax</a><br>
+</div>
+<a th:href="@{/file}">cat</a>
+
+<script type="text/javascript" th:src="@{/static/js/vue.js}"></script>
+<script type="text/javascript" th:src="@{/static/js/axios.min.js}"></script>
+<script type="text/javascript">
+    var vue = new Vue({
+        el:"#app",
+        methods:{
+            testAjax:function (event) {
+                axios({
+                    method:"post",
+                    url:event.target.href,
+                    params:{
+                        username:"admin",
+                        password:"123456"
+                    }
+                }).then(function (response) {
+                    alert(response.data);//响应浏览器的数据
+                });
+                event.preventDefault();
+            }
+        }
+    });
+</script>
+</body>
+</html>
