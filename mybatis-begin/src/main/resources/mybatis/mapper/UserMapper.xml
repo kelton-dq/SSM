@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mybatis.mapper.UserMapper">
+    <!--int insertUser();-->
+    <insert id="insertUser">
+        insert into t_user values (null, 'admin', '123', '男', 25, '123@163.com');
+    </insert>
+    <!--void updateUser();-->
+    <update id="updateUser">
+        update t_user set username = '张三' where id = 2;
+    </update>
+    <!--void deleteUser();-->
+    <delete id="deleteUser">
+        delete from t_user where id = 2;
+    </delete>
+    <!--User getUserById();-->
+    <!--resultType为默认映射关系；resultMap为自定义映射关系，字段名和属性名可以不同-->
+    <select id="getUserById" resultType="mybatis.pojo.User">
+        select * from t_user where id = 1;
+    </select>
+    <!--List<User> getAllUser();-->
+    <select id="getAllUser" resultType="mybatis.pojo.User">
+        select * from t_user;
+    </select>
+</mapper>
