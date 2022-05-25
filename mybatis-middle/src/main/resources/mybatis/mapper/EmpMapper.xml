@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mybatis.mapper.EmpMapper">
+
+    <resultMap id="empResultMap" type="Emp">
+        <id property="eid" column="eid"/><!--主键-->
+        <result property="empName" column="emp_name"/>
+        <result property="age" column="age"/>
+        <result property="sex" column="sex"/>
+        <result property="email" column="email"/>
+    </resultMap>
+
+    <!--List<Emp> getAllEmp();-->
+<!--    <select id="getAllEmp" resultType="Emp">
+        select * from t_emp;
+    </select>
+    -->
+    <select id="getAllEmp" resultMap="empResultMap">
+        select * from t_emp;
+    </select>
+
+    <!--多对一映射 方式1 -->
+    <resultMap id="empAndDeptResultMapOne" type="Emp">
+        <id property="eid" column="eid"/>
+        <result property="empName" column="emp_name"/>
+        <result property="age" column="age"/>
+        <result property="sex" column="sex"/>
+        <result property="email" column="email"/>
+        <result property="dept.did" column="did"/>
+        <result property="dept.deptName" column="dept_name"/>
+    </resultMap>
+    <!--多对一映射 方式2 -->
+    <resultMap id="empAndDeptResultMapTwo" type="Emp">
+        <id property="eid" column="eid"/>
+        <result property="empName" column="emp_name"/>
+        <result property="age" column="age"/>
+        <result property="sex" column="sex"/>
+        <result property="email" column="email"/>
+        <association property="dept" javaType="Dept">
+            <id property="did" column="did"/>
+            <result property="deptName" column="dept_name"/>
+        </association>
+    </resultMap>
+
+    <!--Emp getEmpById(@Param("eid") Integer eid);-->
+    <select id="getEmpById" resultMap="empAndDeptResultMapTwo">
+        select * from t_emp left join t_dept on t_emp.eid = t_dept.did where t_emp.eid = #{eid}
+    </select>
+
+    <!--多对一映射 方式3 -->
+    <!--分步查询 3.1-->
+    <!--Emp getEmpAndDeptByStepOne(@Param("eid") Integer eid);-->
+    <resultMap id="empAndDeptByStepResultMap" type="Emp">
+        <id property="eid" column="eid"/>
+        <result property="empName" column="emp_name"/>
+        <result property="age" column="age"/>
+        <result property="sex" column="sex"/>
+        <result property="email" column="email"/>
+        <association property="dept"
+                     select="mybatis.mapper.DeptMapper.getEmpAndDeptByStepTwo"
+                     column="did"
+                     fetchType="eager"/><!--立即加载-->
+    </resultMap>
+    <!--Emp getEmpAndDeptByStepOne(@Param("eid") Integer eid);-->
+    <select id="getEmpAndDeptByStepOne" resultMap="empAndDeptByStepResultMap">
+	select * from t_emp where eid = #{eid}
+    </select>
+
+    <!--一对多映射 方式2 -->
+    <!--分步查询 2.2-->
+    <!--List<Emp> getDeptAndEmpByStepTwo(@Param("did") Integer did);-->
+    <select id="getDeptAndEmpByStepTwo" resultType="Emp">
+	select * from t_emp where did = #{did}
+    </select>
+
+</mapper>
