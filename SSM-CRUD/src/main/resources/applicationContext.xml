@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--spring配置文件，配置与业务逻辑相关的内容-->
+    <!--核心点：数据源、与mybatis的整合、事务控制等-->
+
+    <!--开启组件扫描-->
+    <context:component-scan base-package="crud">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!--=====================数据源=====================-->
+    <!--引入外部文件-->
+    <context:property-placeholder location="classpath:druid.properties"/>
+    <!--<context:property-placeholder location="classpath:dbconfig.properties"/>-->
+    <!--druid连接池-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${prop.driverClassName}"/>
+        <property name="url" value="${prop.url}"/>
+        <property name="username" value="${prop.username}"/>
+        <property name="password" value="${prop.password}"/>
+    </bean>
+    <!--C3P0连接池-->
+    <!--<bean id="pooledDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="jdbcUrl" value="${jdbc.jdbcUrl}"/>
+        <property name="driverClass" value="${jdbc.driverClass}"/>
+        <property name="user" value="${jdbc.user}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>-->
+
+    <!--=====================与mybatis的整合=====================-->
+    <!--mybatis整合配置-->
+    <bean id="SqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--指定mybatis配置文件位置-->
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+        <property name="dataSource" ref="dataSource"/>
+        <!--指定mapper文件位置-->
+        <property name="mapperLocations" value="classpath:mapper/*.xml"/>
+    </bean>
+    <!--配置扫描器，将mybatis接口的实现加入到IOC容器中-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--扫描所有dao接口的实现，加入到IOC容器中-->
+        <property name="basePackage" value="crud.dao"/>
+    </bean>
+
+    <!--=====================事务控制=====================-->
+    <!--创建事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!--注入dataSource-->
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+<!--    &lt;!&ndash;开启事务注解&ndash;&gt;
+    <tx:annotation-driven transaction-manager="transactionManager"/>-->
+    <!--开启事务，xml形式配置切入点和切面-->
+    <aop:config>
+        <!--配置切入点-->
+        <aop:pointcut id="txPoint" expression="execution(* crud.service..*(..))"/>
+        <!--配置切面，将事务增强添加到切入点-->
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPoint"/>
+    </aop:config>
+    <!--配置通知（增强）-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <!--配置事务参数-->
+        <tx:attributes>
+            <!--指定某类方法上添加特定规则的事务，*表示所有方法均为事务方法-->
+            <tx:method name="*" propagation="REQUIRED"/>
+            <!--以get开头的所有方法-->
+            <tx:method name="get*" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--=====================执行批量操作的sqlSession=====================-->
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg name="sqlSessionFactory" ref="SqlSessionFactory"/>
+        <constructor-arg name="executorType" value="BATCH"/>
+    </bean>
+
+</beans>
