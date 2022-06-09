@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--spring配置文件，配置与业务逻辑相关的内容-->
+    <!--核心点：数据源、与mybatis的整合、事务控制等-->
+
+    <!--开启组件扫描-->
+    <context:component-scan base-package="mapper, pojo, service">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!--=====================数据源=====================-->
+    <!--引入外部文件-->
+    <context:property-placeholder location="classpath:druid.properties"/>
+    <!--druid连接池-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${prop.driverClassName}"/>
+        <property name="url" value="${prop.url}"/>
+        <property name="username" value="${prop.username}"/>
+        <property name="password" value="${prop.password}"/>
+    </bean>
+
+    <!--=====================与mybatis的整合=====================-->
+    <!--mybatis整合配置-->
+    <bean id="SqlSessionFactory" class="com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean">
+        <!--指定mybatis配置文件位置-->
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 设置类型别名所对应的包 -->
+        <property name="typeAliasesPackage" value="pojo"/>
+        <!--指定mapper映射文件位置-->
+        <!--<property name="mapperLocations" value="classpath:mapper/*.xml"/>-->
+        <!-- 设置MyBatis-Plus的全局配置 -->
+<!--        <property name="globalConfig" ref="globalConfig"></property>-->
+        <!--配置插件-->
+        <property name="plugins">
+            <array>
+                <ref bean="mybatisPlusInterceptor"></ref>
+            </array>
+        </property>
+    </bean>
+    <!--配置扫描器，将mybatis接口的实现加入到IOC容器中-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--扫描所有dao（mapper）接口的实现，加入到IOC容器中-->
+        <property name="basePackage" value="mapper"/>
+    </bean>
+
+    <bean id="globalConfig" class="com.baomidou.mybatisplus.core.config.GlobalConfig">
+        <property name="dbConfig">
+            <bean class="com.baomidou.mybatisplus.core.config.GlobalConfig$DbConfig">
+                <!-- 设置实体类所对应的表的前缀 -->
+                <property name="tablePrefix" value="t_"></property>
+            </bean>
+        </property>
+    </bean>
+
+    <!--配置MyBatis-Plus插件-->
+    <bean id="mybatisPlusInterceptor"
+          class="com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor">
+        <property name="interceptors">
+            <list>
+                <ref bean="paginationInnerInterceptor"></ref>
+                <ref bean="optimisticLockerInnerInterceptor"></ref>
+            </list>
+        </property>
+    </bean>
+    <!--配置MyBatis-Plus分页插件的bean-->
+    <bean id="paginationInnerInterceptor"
+          class="com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor">
+    <!--设置数据库类型-->
+    <property name="dbType" value="MYSQL"></property>
+    </bean>
+
+    <!--配置乐观锁插件-->
+    <bean id="optimisticLockerInnerInterceptor"
+          class="com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor">
+    </bean>
+
+</beans>
